@@ -54,12 +54,13 @@ export async function getAuthorTeam(
 }
 
 export async function getLabelKey(
-  useTeams: boolean,
   client: github.GitHub
 ): Promise<string | undefined> {
+  const useTeams = !!process.env.USE_TEAMS
+
   if (useTeams) {
     const team = await getAuthorTeam(client)
-    return `zensurance/${team}`
+    return `${getPrOrganization()}/${team}`
   } else {
     return getPrAuthor()
   }

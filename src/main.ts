@@ -11,7 +11,6 @@ import {
 async function run() {
   try {
     const token = core.getInput('repo-token', {required: true})
-    const useTeams = !!core.getInput('use-teams', {required: true})
     const configPath = core.getInput('configuration-path', {required: true})
 
     const prNumber = getPrNumber()
@@ -22,7 +21,7 @@ async function run() {
 
     const client = createClient(token)
 
-    const labelKey = getLabelKey(useTeams, client)
+    const labelKey = getLabelKey(client)
 
     if (!labelKey) {
       core.debug(
