@@ -1,9 +1,9 @@
 export function getTeamLabel(
   labelsConfiguration: Map<string, string[]>,
-  author: string
+  key: string
 ): string[] {
   const labels: string[] = []
-  for (const [label, authors] of labelsConfiguration.entries())
-    if (authors.includes(author)) labels.push(label)
+  for (const [label, keys] of labelsConfiguration.entries())
+    if (keys.includes(key)) labels.push(label)
   return labels
 }

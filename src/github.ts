@@ -1,5 +1,6 @@
 import * as github from '@actions/github'
 import * as yaml from 'js-yaml'
+import {graphql, GraphQLSchema, GraphQLObjectType, GraphQLString} from 'graphql'
 
 export function getPrNumber(): number | undefined {
   const pullRequest = github.context.payload.pull_request
@@ -17,6 +18,51 @@ export function getPrAuthor(): string | undefined {
   }
 
   return pullRequest.user.login
+}
+
+export function getPrOrganization(): string | undefined {
+  return github.context.payload.organization
+}
+
+export async function getAuthorTeam(
+  client: github.GitHub
+): Promise<string | undefined> {
+  const response = (await client.graphql(
+    `
+      {
+        organization(login: "${getPrOrganization()}") {
+          teams(first: 1, userLogins: ["${getPrAuthor()}"]) {
+            totalCount
+            edges {
+              node {
+                name
+              }
+            }
+          }
+        }
+      }
+    `
+  )) as any
+
+  if (response.errors) {
+    throw response.errors
+  }
+
+  const team = response.data.organization.teams.edges[0].node.name
+
+  return team
+}
+
+export async function getLabelKey(
+  useTeams: boolean,
+  client: github.GitHub
+): Promise<string | undefined> {
+  if (useTeams) {
+    const team = await getAuthorTeam(client)
+    return `zensurance/${team}`
+  } else {
+    return getPrAuthor()
+  }
 }
 
 export async function getLabelsConfiguration(
